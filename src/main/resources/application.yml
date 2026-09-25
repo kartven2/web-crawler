@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: web-crawler
+
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/webcrawler
+    username: crawler
+    password: crawlerpass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update          # auto-creates tables on startup
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # ── Redis ───────────────────────────────────────────────────────────────────
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # ── RabbitMQ ─────────────────────────────────────────────────────────────────
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+server:
+  port: 8080
+
+# ── Crawler Configuration ────────────────────────────────────────────────────
+app:
+  crawler:
+    start-url: https://www.geeksforgeeks.org
+    max-depth: 2
+    worker-count: 5
+    crawl-delay-ms: 1500         # per-domain politeness delay (ms)
+    max-urls-per-domain: 50      # circuit-breaker: max URLs queued per domain
+    user-agent: "WebCrawlerBot/1.0 (+https://github.com/example/web-crawler)"
+    connect-timeout-ms: 5000
+    socket-timeout-ms: 10000
+    connection-pool-size: 20     # Apache HttpClient connection pool size
+
+# ── RabbitMQ Queue / Exchange names ─────────────────────────────────────────
+crawler:
+  rabbitmq:
+    exchange: crawler.exchange
+    default-queue: crawler.url.default
+    routing-key-prefix: crawler.domain.
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
